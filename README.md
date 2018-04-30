@@ -19,4 +19,10 @@ First, I extracted the general place the data resides on the webpage, by finding
 
 So far, this isolates the specific div where each of the 5 reviews lie.  Now, I have to grab the **review text** as well as the **rating**.  Luckily, these are the only things I need for the purpose of machine learning.
 
+### Grabbing the Review Text
+`Not working yet`
+
+ `egrep -o "<p class=\"partial_entry\"[^<]*<p>"`
+ What I want this to do is to grab the whole `<p></p>` block but it doesn't work because it stops at any HTML tag within that block.  There are some <scan> tags, so this doesn't work too well.
+
 TODO: Finish the process
