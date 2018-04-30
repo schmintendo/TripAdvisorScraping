@@ -20,9 +20,14 @@ First, I extracted the general place the data resides on the webpage, by finding
 So far, this isolates the specific div where each of the 5 reviews lie.  Now, I have to grab the **review text** as well as the **rating**.  Luckily, these are the only things I need for the purpose of machine learning.
 
 ### Grabbing the Review Text
-`Not working yet`
 
- `egrep -o "<p class=\"partial_entry\"[^<]*<p>"`
- What I want this to do is to grab the whole `<p></p>` block but it doesn't work because it stops at any HTML tag within that block.  There are some <scan> tags, so this doesn't work too well.
+`cat FILENAME_HERE.html | tr -d "\r\n" | tr '[:upper:]' '[:lower:]' | egrep -o "<div class=\"listcontainer.hide-more-mobile.*<a data-page-number=\"[0-9]*\".*data-offset=\"[0-9]*\"class=\"pagenum last[^<]*</a></div></div><[^>]*><[^>]*>" | sed 's/<p/\n&/g' | egrep -o "<p class=\"partial_entry\".*</p>" | sed s/"<[^>]*>"//g`
+
+To grab the reviews, they're inside of `<p> /Review Text/ </p>` tags, so I grabbed those using egrep, plus this cool sed trick:
+`sed 's/<p/\n&/g' | egrep -o "<p class=\"partial_entry\".*</p>"`
+
+And finally, I removed all the HTML tags: `sed s/"<[^>]*>"//g`
+
+Now, we finally have the review text!  Now to parallelize this to many TripAdvisor pages.
 
 TODO: Finish the process
