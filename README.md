@@ -30,4 +30,18 @@ And finally, I removed all the HTML tags: `sed s/"<[^>]*>"//g`
 
 Now, we finally have the review text!  Now to parallelize this to many TripAdvisor pages.
 
+Hold up, not so fast!  We need the review scores from each of these reviews!  This is the pipeline for that:
+
+ `cat Hotel_Review-g32655-d124956-Reviews-Hotel_Figueroa-Los_Angeles_California.html | tr -d "\r\n" | tr '[:upper:]' '[:lower:]' | egrep -o "<div class=\"listcontainer.hide-more-mobile.*<a data-page-number=\"[0-9]*\".*data-offset=\"[0-9]*\"class=\"pagenum last[^<]*</a></div></div><[^>]*><[^>]*>" | sed 's/<span class=\"ui_bubble_rating bubbl/\n&/g' | sed s/"<span class=\"ui_bubble_rating bubble_\([0-9]\)[0-9]"/\\n\\1\\n\\n/ | egrep "^[0-9]$"`
+ 
+Each review score is inside this `<span class="ui_bubble_rating bubble_RATINGHERE>`.  So I had to use the newline trick with sed to isolate those. (`sed s/"<span class=\"ui_bubble_rating bubble_\([0-9]\)[0-9]"/\\n\\1\\n\\n/`)
+
+After that, I just grepped the lines that started and ended with just one number (`egrep "^[0-9]$"`)
+
+Next, we have to pipe those into files!  Just add > filename.txt to the end of the pipeline, and it will save to a file.  Do this with both the review text and review score.
+
+Then, concatenate those files into a tsv format using paste:  `paste reviewScore.txt reviewText.txt > consolidatedReviews.tsv`
+
+Now we're ready to parallelize.
+
 TODO: Finish the process
