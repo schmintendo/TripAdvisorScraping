@@ -44,4 +44,24 @@ Then, concatenate those files into a tsv format using paste:  `paste reviewScore
 
 Now we're ready to parallelize.
 
-TODO: Finish the process
+### PARALLELIZING:
+
+The way that `curl` works is that it downloads the html, but is more robust than `wget` and uses a library, called libcurl.  Using curl, we can download each TripAdvisor link:
+
+`https://www.tripadvisor.com/Hotel_Review-g32655-d124956-Reviews-or[this number increments by 5]-Hotel_Figueroa-Los_Angeles_California.html`
+
+As you can see, the format of the link dictates that the "or_" number increments by 5 for each page.
+
+This can be done with curl by doing: `curl https://www.tripadvisor.com/Hotel_Review-g32655-d124956-Reviews-or[5-575:5]-Hotel_Figueroa-Los_Angeles_California.html -o HotelFigueroaPage#1.html`
+
+*Keep in mind, the number of pages TripAdvisor says it has should be multiplied by 5.  E.g. 116 pages of reviews = [5-575:5]*
+
+1. So, download each review page using curl, and the syntax defined above
+2. run `reviewScoreScraper.sh` and `reviewTextScraper.sh` on each of them like this:
+ `find *.html | xargs bash reviewScoreScraper.sh`, and also run `find *.html | xargs bash reviewTextScraper.sh`
+3. There should be two files, reviewText.txt and reviewScore.txt. paste those together using `paste reviewScore.txt reviewText.txt > HotelNameHereReviews.tsv`
+
+
+And we're done!  That is my complete pipeline and parallelization process for grabbing hotel reviews for any hotel from TripAdvisor!
+
+Feel free to use, change, and/or modify this if you would like.
