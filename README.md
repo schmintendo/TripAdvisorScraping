@@ -21,10 +21,12 @@ So far, this isolates the specific div where each of the 5 reviews lie.  Now, I 
 
 ### Grabbing the Review Text
 
-`cat FILENAME_HERE.html | tr -d "\r\n" | tr '[:upper:]' '[:lower:]' | egrep -o "<div class=\"listcontainer.hide-more-mobile.*<a data-page-number=\"[0-9]*\".*data-offset=\"[0-9]*\"class=\"pagenum last[^<]*</a></div></div><[^>]*><[^>]*>" | sed 's/<p/\n&/g' | egrep -o "<p class=\"partial_entry\".*</p>" | sed s/"<[^>]*>"//g`
+`cat FILENAME_HERE.html | tr -d "\r\n" | tr '[:upper:]' '[:lower:]' | egrep -o "<div class=\"listcontainer.hide-more-mobile.*<a data-page-number=\"[0-9]*\".*data-offset=\"[0-9]*\"class=\"pagenum last[^<]*</a></div></div><[^>]*><[^>]*>" | sed 's/<div class=\"loadingshade hidden/\n&/g' | sed 's/<div class=\"mgrrspninline\">.*<\/div><\/div><\/div>//g' | sed 's/<p/\n&/g' | egrep -o "<p class=\"partial_entry\".*</p>" | sed s/"<[^>]*>"//g`
 
 To grab the reviews, they're inside of `<p> /Review Text/ </p>` tags, so I grabbed those using egrep, plus this cool sed trick:
 `sed 's/<p/\n&/g' | egrep -o "<p class=\"partial_entry\".*</p>"`
+
+I used that same trick to remove the manager response to each review: `sed 's/<div class=\"loadingshade hidden/\n&/g' | sed 's/<div class=\"mgrrspninline\">.*<\/div><\/div><\/div>//g'`
 
 And finally, I removed all the HTML tags: `sed s/"<[^>]*>"//g`
 
