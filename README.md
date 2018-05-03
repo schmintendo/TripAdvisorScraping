@@ -63,6 +63,8 @@ This can be done with curl by doing: `curl https://www.tripadvisor.com/Hotel_Rev
  `find *.html | xargs cat | bash reviewScoreScraper.sh`, and also run `find *.html | xargs cat | bash reviewTextScraper.sh`
 3. There should be two files, reviewText.txt and reviewScore.txt. paste those together using `paste reviewScore.txt reviewText.txt > HotelNameHereReviews.tsv`
 
+Note: You might want to use my cleaner, `reviewTextCleaner.sh`, to clean the resulting text file, as it seems to have lines that say "more" only, as well as empty lines.  The cleaner should get rid of those.
+
 
 And we're done!  That is my complete pipeline and parallelization process for grabbing hotel reviews for any hotel from TripAdvisor!
 
