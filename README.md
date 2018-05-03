@@ -58,7 +58,7 @@ This can be done with curl by doing: `curl https://www.tripadvisor.com/Hotel_Rev
 
 1. So, download each review page using curl, and the syntax defined above
 2. run `reviewScoreScraper.sh` and `reviewTextScraper.sh` on each of them like this:
- `find *.html | xargs bash reviewScoreScraper.sh`, and also run `find *.html | xargs bash reviewTextScraper.sh`
+ `find *.html | xargs cat | bash reviewScoreScraper.sh`, and also run `find *.html | xargs cat | bash reviewTextScraper.sh`
 3. There should be two files, reviewText.txt and reviewScore.txt. paste those together using `paste reviewScore.txt reviewText.txt > HotelNameHereReviews.tsv`
 
 
