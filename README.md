@@ -21,28 +21,30 @@ So far, this isolates the specific div where each of the 5 reviews lie.  Now, I 
 
 ### Grabbing the Review Text
 
-`cat FILENAME_HERE.html | tr -d "\r\n" | tr '[:upper:]' '[:lower:]' | egrep -o "<div class=\"listcontainer.hide-more-mobile.*<a data-page-number=\"[0-9]*\".*data-offset=\"[0-9]*\"class=\"pagenum last[^<]*</a></div></div><[^>]*><[^>]*>" | sed 's/<div class=\"loadingshade hidden/\n&/g' | sed 's/<div class=\"mgrrspninline\">.*<\/div><\/div><\/div>//g' | sed 's/<p/\n&/g' | egrep -o "<p class=\"partial_entry\".*</p>" | sed s/"<[^>]*>"//g`
+```
+for x in $@
+        do
+                cat $x | tr -d "\r\n" | tr '[:upper:]' '[:lower:]' | egrep -o "<div class=\"listcontainer.hide-more-mobile.*<a data-page-number=\"[0-9]*\".*data-offset=\"[0-9]*\"class=\"pagenum last[^<]*</a></div></div><[^>]*><[^>]*>" | sed 's/<span class=\"ui_bubble_rating bubbl/\n&/g' | sed s/"<span class=\"ui_bubble_rating bubble_\([0-9]\)[0-9]"/\\1/ | sed 's/<div class=\"loadingshade hidden/\n&/g' | sed 's/<div class=\"mgrrspninline\">.*<\/div><\/div><\/div>//g' | sed 's/<p/\n&/g' | sed 's/\"><\/span><span class=\"ratingdate\".*<div class=\"entry\">//' | egrep -o "^[0-9]|<p class=\"partial_entry\".*</p>" | sed s/"<[^>]*>"//g | paste - - >> reviews.txt
+        done
+```
+This is the bash script I created to scrape the review text as well as the score.
+
+##### Explanation:
 
 To grab the reviews, they're inside of `<p> /Review Text/ </p>` tags, so I grabbed those using egrep, plus this cool sed trick:
 `sed 's/<p/\n&/g' | egrep -o "<p class=\"partial_entry\".*</p>"`
 
 I used that same trick to remove the manager response to each review: `sed 's/<div class=\"loadingshade hidden/\n&/g' | sed 's/<div class=\"mgrrspninline\">.*<\/div><\/div><\/div>//g'`
-
-And finally, I removed all the HTML tags: `sed s/"<[^>]*>"//g`
-
-Now, we finally have the review text!  Now to parallelize this to many TripAdvisor pages.
-
-Hold up, not so fast!  We need the review scores from each of these reviews!  This is the pipeline for that:
-
- `cat Hotel_Review-g32655-d124956-Reviews-Hotel_Figueroa-Los_Angeles_California.html | tr -d "\r\n" | tr '[:upper:]' '[:lower:]' | egrep -o "<div class=\"listcontainer.hide-more-mobile.*<a data-page-number=\"[0-9]*\".*data-offset=\"[0-9]*\"class=\"pagenum last[^<]*</a></div></div><[^>]*><[^>]*>" | sed 's/<span class=\"ui_bubble_rating bubbl/\n&/g' | sed s/"<span class=\"ui_bubble_rating bubble_\([0-9]\)[0-9]"/\\n\\1\\n\\n/ | egrep "^[0-9]$"`
  
-Each review score is inside this `<span class="ui_bubble_rating bubble_RATINGHERE>`.  So I had to use the newline trick with sed to isolate those. (`sed s/"<span class=\"ui_bubble_rating bubble_\([0-9]\)[0-9]"/\\n\\1\\n\\n/`)
+Each review score is inside this `<span class="ui_bubble_rating bubble_RATINGHERE>`.  So I had to use the newline trick with sed to isolate those. (`sed s/"<span class=\"ui_bubble_rating bubble_\([0-9]\)[0-9]"/\\1/`)
 
-After that, I just grepped the lines that started and ended with just one number (`egrep "^[0-9]$"`)
+After that, I just grepped the lines that started and ended with just one number, or the `<p> /Review Text/ </p>` (`egrep -o "^[0-9]|<p class=\"partial_entry\".*</p>"`)
 
-Next, we have to pipe those into files!  Just add > filename.txt to the end of the pipeline, and it will save to a file.  Do this with both the review text and review score.
+Lastly, I removed all the HTML tags: `sed s/"<[^>]*>"//g`
 
-Then, concatenate those files into a tsv format using paste:  `paste reviewScore.txt reviewText.txt > consolidatedReviews.tsv`
+And then pasted each line (which was formatted "RATING_NUMBER, newline, REVIEW_TEXT" together using this cool paste trick: `paste - -` (Thanks StackOverflow!)
+
+Next, we have to pipe those into files!  Just add >> filename.txt to the end of the pipeline, and it will append to a file (`>` is good for saving to a file once, `>>` is good for parallelization (saving to files and adding to that same file)).  I did this with both scores.
 
 Now we're ready to parallelize.
 
@@ -59,11 +61,9 @@ This can be done with curl by doing: `curl https://www.tripadvisor.com/Hotel_Rev
 *Keep in mind, the number of pages TripAdvisor says it has should be multiplied by 5.  E.g. 116 pages of reviews = [5-575:5]*
 
 1. So, download each review page using curl, and the syntax defined above
-2. run `reviewScoreScraper.sh` and `reviewTextScraper.sh` on each of them like this:
- `find *.html | xargs cat | bash reviewScoreScraper.sh`, and also run `find *.html | xargs cat | bash reviewTextScraper.sh`
-3. There should be two files, reviewText.txt and reviewScore.txt. paste those together using `paste reviewScore.txt reviewText.txt > HotelNameHereReviews.tsv`
-
-Note: You might want to use my cleaner, `reviewTextCleaner.sh`, to clean the resulting text file, as it seems to have lines that say "more" only, as well as empty lines.  The cleaner should get rid of those.
+2. run `reviewScraper.sh` on each file like this:
+ `find *.html | xargs bash reviewScraper.sh`
+3. There should be one file remaining with you reviews, called `reviews.txt`.
 
 
 And we're done!  That is my complete pipeline and parallelization process for grabbing hotel reviews for any hotel from TripAdvisor!
