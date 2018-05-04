@@ -1,1 +1,0 @@
-tr -d "\r\n" | tr '[:upper:]' '[:lower:]' | egrep -o "<div class=\"listcontainer.hide-more-mobile.*<a data-page-number=\"[0-9]*\".*data-offset=\"[0-9]*\"class=\"pagenum last[^<]*</a></div></div><[^>]*><[^>]*>" | sed 's/<p/\n&/g' | egrep -o "<p class=\"partial_entry\".*</p>" | sed s/"<[^>]*>"//g >> reviewText.txt
