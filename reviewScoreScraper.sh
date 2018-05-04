@@ -1,1 +1,0 @@
-tr -d "\r\n" | tr '[:upper:]' '[:lower:]' | egrep -o "<div class=\"listcontainer.hide-more-mobile.*<a data-page-number=\"[0-9]*\".*data-offset=\"[0-9]*\"class=\"pagenum last[^<]*</a></div></div><[^>]*><[^>]*>" | sed 's/<span class=\"ui_bubble_rating bubbl/\n&/g' | sed s/"<span class=\"ui_bubble_rating bubble_\([0-9]\)[0-9]"/\\n\\1\\n\\n/ | egrep "^[0-9]$" >> reviewScore.txt
