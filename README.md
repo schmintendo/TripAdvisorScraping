@@ -63,7 +63,7 @@ This can be done with curl by doing: `curl https://www.tripadvisor.com/Hotel_Rev
 1. So, download each review page using curl, and the syntax defined above
 2. run `reviewScraper.sh` on each file like this:
  `find *.html | xargs bash reviewScraper.sh`
-3. There should be one file remaining with you reviews, called `reviews.txt`.
+3. There should be one file remaining with you reviews, called `reviews.txt`. (Tip: This is a tab delimited file, so you can load it into Excel if you use the import function and say that it is delimited by tabs)
 
 
 And we're done!  That is my complete pipeline and parallelization process for grabbing hotel reviews for any hotel from TripAdvisor!
